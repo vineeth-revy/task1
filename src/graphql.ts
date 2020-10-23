@@ -26,6 +26,7 @@ export interface PermissionInput {
 
 export interface IQuery {
     allRoles(limit?: number, offset?: number): Roles[] | Promise<Roles[]>;
+    findOne(id: string): Roles | Promise<Roles>;
 }
 
 export interface IMutation {

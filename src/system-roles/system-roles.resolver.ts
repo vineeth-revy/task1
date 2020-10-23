@@ -16,7 +16,12 @@ export class SystemRolesResolver {
 
     @Query()
     async allRoles(@Args('limit') limit:number=0,@Args('offset') offset:number=0): Promise<ResponseRoleDTO[]> {
-        return await this.systemservice.findall(limit,offset);
+        return await this.systemservice.findAll(limit,offset);
+    }
+
+    @Query()
+    async findOne(@Args('id') id: number | string): Promise<ResponseRoleDTO>{
+        return this.systemservice.findOne(id);
     }
 
     @Mutation()

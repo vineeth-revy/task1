@@ -23,27 +23,11 @@ export class SystemRolesService {
         let complete_role = await this.role.save({permissions:role.permission,role:new_role});
 
         let system_array: SystemEntity[] = await this.system.find();
-
-        //console.log(complete_role);
-        
-        let permission = complete_role.permissions.map((perm) => {
-            return this.permissionConvert(perm,system_array);
-        });
-
-        let response: ResponseRoleDTO = {
-            id: complete_role.id,
-            roleId: complete_role.role.id.toString(),
-            description: complete_role.role.description,
-            code: complete_role.role.code,
-            permission: permission.flat()
-        }
-        //console.log(response);
-
-        return response;
+    
+        return this.permissionConvert(complete_role,system_array);    
     }
 
-    async findall(limit: number,offset: number): Promise<ResponseRoleDTO[]> {
-        
+    async findAll(limit: number,offset: number): Promise<ResponseRoleDTO[]> {
         //let p: Roles[] = await this.role.find({relations:["role"]});
         let system_array: SystemEntity[] = await this.system.find();
         
@@ -53,27 +37,36 @@ export class SystemRolesService {
             skip: limit*offset
         });
 
-        let responseArray = p.map(val => {
-            
-            let perm: string[] = (val.permissions.map(value => {
-                return this.permissionConvert(value,system_array)
-            })).flat();
-            let response: ResponseRoleDTO = {
-                id: val.id.toString(),
-                roleId: val.role.id,
-                description: val.role.description,
-                code: val.role.code,
-                permission: perm
-            }
-            return response;
-        })
+        let responseArray = p.map(val => this.permissionConvert(val,system_array))
 
-        return Promise.resolve(responseArray);
+        return responseArray;
     }
 
-    permissionConvert(perm,system_array: SystemEntity[]): string[] {
+    async findOne(id: number | string): Promise<ResponseRoleDTO> {
         
-        let {name} = system_array.find((ob) => ob.id == perm.moduleId);
-        return perm.access.map((m) =>m.concat(name));
+        let p = await this.role.findOne(id,{relations:["role"]});
+
+        let system_array = await this.system.find();
+        
+        return this.permissionConvert(p,system_array);  
+    }
+
+    permissionConvert(val,system_array: SystemEntity[]): ResponseRoleDTO {
+        
+        let permission = val.permissions;
+        let new_perm = permission.map((perm) => {
+            let {name} = system_array.find((ob) => ob.id == perm.moduleId);
+            return perm.access.map((m) =>m.concat(name));
+        })
+        
+        let response: ResponseRoleDTO = {
+            id: val.id.toString(),
+            roleId: val.role.id,
+            description: val.role.description,
+            code: val.role.code,
+            permission: new_perm.flat()
+        }
+
+        return response;
     }
 }
