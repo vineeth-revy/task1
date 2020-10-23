@@ -1,0 +1,35 @@
+type Query {
+    allRoles(limit:Int,offset:Int): [Roles]!
+}
+
+type Mutation {
+    createRole(role:RoleInput!): Roles!
+}
+
+input RoleInput {
+    code: String!
+    description: String!
+    permission: [PermissionInput!]!
+}
+
+type Roles {
+    id: ID!
+    roleId: ID!
+    code: String!
+    description: String!
+    permission: [String]!
+}
+
+
+
+input PermissionInput {
+    moduleId: Int!
+    access: [Access!]!
+}
+enum Access {
+    Create
+    Delete
+    Update
+    Read
+}
+
